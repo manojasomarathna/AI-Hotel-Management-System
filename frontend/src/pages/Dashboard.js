@@ -6,14 +6,15 @@ export default function Dashboard() {
   const [summary, setSummary] = useState(null);
   const [chartData, setChartData] = useState([]);
   const [aiSummary, setAiSummary] = useState("");
+  const [offline, setOffline] = useState(false);
 
   useEffect(() => {
-    api.get("/dashboard/summary").then((r) => setSummary(r.data));
-    api.get("/dashboard/monthly-sales").then((r) => setChartData(r.data));
+    api.get("/dashboard/summary").then((r) => setSummary(r.data)).catch(() => setOffline(true));
+    api.get("/dashboard/monthly-sales").then((r) => setChartData(r.data)).catch(() => {});
   }, []);
 
   const getAISummary = () => {
-    api.get("/ai/report-summary").then((r) => setAiSummary(r.data.summary));
+    api.get("/ai/report-summary").then((r) => setAiSummary(r.data.summary)).catch(() => setAiSummary("Backend is not running. Start the backend to use AI features."));
   };
 
   const cards = summary
@@ -29,6 +30,13 @@ export default function Dashboard() {
   return (
     <div style={styles.page}>
       <h2>📊 Dashboard</h2>
+
+      {offline && (
+        <div style={styles.offlineBanner}>
+          ⚠️ Backend is not running. Start the backend to see live data.
+          <code style={{ marginLeft: "12px", fontSize: "12px" }}>docker-compose up --build</code>
+        </div>
+      )}
       <div style={styles.cards}>
         {cards.map((c) => (
           <div key={c.label} style={{ ...styles.card, borderTop: `4px solid ${c.color}` }}>
@@ -60,6 +68,7 @@ export default function Dashboard() {
 
 const styles = {
   page: { padding: "24px" },
+  offlineBanner: { background: "#fef3c7", border: "1px solid #f59e0b", color: "#92400e", padding: "12px 16px", borderRadius: "8px", marginBottom: "20px", fontSize: "14px" },
   cards: { display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "24px" },
   card: { background: "#fff", padding: "20px", borderRadius: "10px", minWidth: "160px", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" },
   cardLabel: { color: "#666", fontSize: "13px", margin: 0 },

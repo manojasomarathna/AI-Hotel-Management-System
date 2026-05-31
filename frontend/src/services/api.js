@@ -15,6 +15,7 @@ api.interceptors.response.use(
       localStorage.clear();
       window.location.href = "/login";
     }
+    // Silently ignore network errors (backend not running)
     return Promise.reject(err);
   }
 );
